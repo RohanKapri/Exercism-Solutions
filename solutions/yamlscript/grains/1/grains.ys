@@ -1,0 +1,7 @@
+!yamlscript/v0
+
+defn square(square):
+  (1 <= square <= 64) ||:
+    die: 'square must be between 1 and 64'
+
+  pow 2: square - 1

@@ -1,0 +1,10 @@
+!yamlscript/v0
+
+defn encode(phrase):
+  lc(phrase):decode:
+    .replace(/[^a-z0-9]/)
+    .partition(5 5 '').map(join):joins
+
+defn decode(phrase):
+  m =: (\\a .. \\z).zipmap(\\z .. \\a)
+  phrase: .replace(' ').escape(m)
