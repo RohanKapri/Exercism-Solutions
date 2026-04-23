@@ -1,0 +1,5 @@
+!yamlscript/v0
+
+defn is-armstrong-number(number):
+  ds =: digits(number)
+  number ==: ds.map(\(_ ** ds.#)):sum

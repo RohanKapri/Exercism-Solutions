@@ -1,0 +1,16 @@
+!yamlscript/v0
+
+defn rebase(input-base digits output-base):
+  when input-base < 2: 
+    die('input base must be >= 2')
+    
+  when output-base < 2: 
+    die('output base must be >= 2')
+  
+  when-not digits.every?(\(-1 < _ < input-base)): 
+    die('all digits must satisfy 0 <= d < input base')
+  
+  loop decimal reduce(\((_ * input-base) + %2) 0 digits), result []:
+    if decimal.?:
+      =>: recur(quot(decimal output-base) result.cons(decimal % output-base))
+      result |||: -[0]

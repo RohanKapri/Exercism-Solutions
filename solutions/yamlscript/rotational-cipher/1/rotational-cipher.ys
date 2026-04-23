@@ -1,0 +1,6 @@
+!yamlscript/v0
+
+defn rotate(text shift-key):
+  cmap =: \(zipmap(_ drop(shift-key cycle(_))))
+  text.escape(cmap(\\A .. \\Z)):
+      .escape(cmap(\\a .. \\z))

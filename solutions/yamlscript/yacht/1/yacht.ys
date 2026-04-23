@@ -1,0 +1,52 @@
+!yamlscript/v0
+
+# Score categories mapping for number categories
+number-categories =::
+  ones: 1
+  twos: 2
+  threes: 3
+  fours: 4
+  fives: 5
+  sixes: 6
+
+defn score(dice category):
+  category.replace(/\ / '-')
+    .str('do-' _).call(dice).or(0)
+
+# Helper function for checking all dice are equal
+defn- do-yacht(dice): 
+  eq(dice*) && 50
+
+# Generic function for scoring number categories
+defn- same-number(n):
+  fn(dice): dice.filter(eq(n)):sum
+
+# Define number category scoring functions
+do-ones   =: same-number(1)
+do-twos   =: same-number(2)
+do-threes =: same-number(3)
+do-fours  =: same-number(4)
+do-fives  =: same-number(5)
+do-sixes  =: same-number(6)
+
+# Helper function for full house scoring
+defn- do-full-house(dice):
+  freqs =: frequencies(dice)
+  when freqs.#.eq(2) && freqs:vals.has?(2):
+    sum: dice
+
+# Helper function for four of a kind scoring
+defn- do-four-of-a-kind(dice):
+  freqs =: frequencies(dice):V:reverse:M
+  mul 4: freqs.get(4) || freqs.get(5) || 0
+
+# Helper functions for straight scoring
+defn- do-little-straight(dice):
+  dice:sort == (1 .. 5) &&: 30
+
+defn- do-big-straight(dice):
+  dice:sort == (2 .. 6) &&: 30
+
+# Helper function for choice scoring
+defn- do-choice(dice): 
+  sum(dice)
