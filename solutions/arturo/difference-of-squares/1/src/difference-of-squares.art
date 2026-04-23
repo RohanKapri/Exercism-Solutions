@@ -1,0 +1,11 @@
+identity: $ => [&]
+square:   $ => [&^2]
+squareOfSum: function [n][
+    range 1 n | map => identity | sum | square
+]
+sumOfSquares: function [n][
+    range 1 n | map => square | sum | identity
+]
+differenceOfSquares: function [n][
+    abs sub sumOfSquares n squareOfSum n
+]

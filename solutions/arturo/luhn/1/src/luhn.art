@@ -1,0 +1,11 @@
+luhn?: function [value][
+    clean: replace value " " ""
+    if or? [clean = "0"]
+           [not? numeric? clean] -> return false
+    zero? (sum map.with:'i reverse digits to :integer clean  'x [
+        (odd? i)? 
+            -> (9 < double: <= 2 * x)? -> double - 9
+                                       -> double
+            -> x
+    ]) % 10
+]

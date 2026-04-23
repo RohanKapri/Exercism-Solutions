@@ -1,0 +1,31 @@
+; Dedicated to Junko F. Didi and Shree DR.MDD
+annotate: function [field][
+    if empty? field -> return []
+
+    rowSet: 0..(dec size field)
+    colSet: 0..(dec size field\0)
+    marked: new field
+
+    bloom?: $=> [& = '*']
+
+    around: function [r c][
+        cnt: 0
+        loop (neg 1)..1 'dr [
+            if not? in? (r + dr) rowSet -> continue
+            loop (neg 1)..1 'dc [
+                if not? in? (c + dc) colSet -> continue
+                if and? [zero? dr] [zero? dc] -> continue
+                if bloom? field\[r + dr]\[c + dc] -> inc 'cnt
+            ]
+        ]
+        (zero? cnt)? -> ' ' -> to :string cnt
+    ]
+
+    loop.with:'r field 'line [
+        loop.with:'c line 'spot [
+            if not? bloom? spot -> marked\[r]\[c]: around r c
+        ]
+    ]
+
+    marked
+]

@@ -1,0 +1,11 @@
+diamond: function[letter][ 
+    alpha: alphabet.upper 'en
+    size: 1 + index alpha letter
+    quad: map 0..(dec size) 'i [
+        row: repeat " " size
+        row\[i]: alpha\[i]
+        row
+    ]
+    top: map quad 'row [ (reverse drop row) ++ row ]
+    top ++ drop reverse top | join.with:"\n"
+]

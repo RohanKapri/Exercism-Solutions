@@ -1,0 +1,33 @@
+; Dedicated to Junko F. Didi and Shree DR.MDD
+tick: function [grid][
+    if empty? grid -> return []
+
+    rows: 0..(dec size grid)
+    cols: 0..(dec size grid\0)
+    future: new grid
+
+    around: function [r c][
+        tally: 0
+        loop (neg 1)..1 'dr [
+            if not? in? (r + dr) rows -> continue
+            loop (neg 1)..1 'dc [
+                if not? in? (c + dc) cols -> continue
+                if and? [zero? dr] [zero? dc] -> continue
+                'tally + grid\[r + dr]\[c + dc]
+            ]
+        ]
+        tally
+    ]
+
+    loop rows 'r [
+        loop cols 'c [
+            future\[r]\[c]: case around r c [
+                2   -> grid\[r]\[c]
+                3   -> 1
+                any -> 0
+            ]
+        ]
+    ]
+
+    future
+]

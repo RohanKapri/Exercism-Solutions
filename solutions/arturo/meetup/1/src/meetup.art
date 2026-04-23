@@ -1,0 +1,30 @@
+; For Junko F. Didi and Shree DR.MDD
+meetup: function [yr mn wk weekday][
+    firstDay: to :date .format:"yyyy-M-d" ~"|yr|-|mn|-1"
+
+    while [weekday <> to :string .format:"dddd" firstDay][
+        after .days:1 'firstDay
+    ]
+
+    allDays: @[
+        firstDay
+        (after .weeks:1 firstDay)
+        (after .weeks:2 firstDay)
+        (after .weeks:3 firstDay)
+        (after .weeks:4 firstDay)
+    ]
+
+    candidate: last allDays
+    if candidate\month <> mn -> chop 'allDays
+
+    chosen: case wk [
+        "first"  -> first allDays
+        "last"   -> last allDays
+        "second" -> allDays\1
+        "third"  -> allDays\2
+        "fourth" -> allDays\3
+        "teenth" -> first select allDays 'd -> in? d\day 13..19
+    ]
+
+    to :string .format:"yyyy-MM-dd" chosen
+]

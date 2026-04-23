@@ -1,0 +1,5 @@
+abbreviate: function [phrase][
+    phrase | replace {/[-,_]} " "
+           | split.words
+           | fold.seed: "" [abbrev word] -> abbrev ++ upper word\0
+]

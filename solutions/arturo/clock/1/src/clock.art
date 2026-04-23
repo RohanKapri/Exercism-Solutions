@@ -1,0 +1,35 @@
+; Dedicated to Junko F. Didi and Shree DR.MDD
+define :clock [
+    init: method [hrs :quantity, mins :quantity][
+        this\mins: mod scalar mins 60
+        this\hrs: mod add div scalar mins 60 scalar hrs 24
+        if this\hrs < 0 -> this\hrs: 24 + this\hrs
+        if this\mins < 0 [
+            this\mins: 60 + this\mins
+            dec 'this\hrs
+        ]
+    ]
+
+    increment: method [delta :quantity][
+        temp: to :clock [this\hrs --> `hr, delta + this\mins --> `min]
+        this\hrs: temp\hrs
+        this\mins: temp\mins
+    ]
+
+    decrement: method [delta :quantity][
+        temp: to :clock [this\hrs --> `hr, (this\mins --> `min) - delta]
+        this\hrs: temp\hrs
+        this\mins: temp\mins
+        if this\hrs < 0 -> this\hrs: 24 + this\hrs
+    ]
+
+    equal?: method [other][
+        and? this\hrs = other\hrs, this\mins = other\mins
+    ]
+
+    string: method [][
+        hh: pad.with:'0' to :string this\hrs 2
+        mm: pad.with:'0' to :string this\mins 2
+        ~"|hh|:|mm|"
+    ]
+]

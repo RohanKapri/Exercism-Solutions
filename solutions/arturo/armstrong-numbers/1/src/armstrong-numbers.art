@@ -1,0 +1,6 @@
+armstrong?: function[n][
+    ds: digits n
+    width: size ds
+    armstrongSum: sum map ds => [pow & width]
+    n = armstrongSum
+]

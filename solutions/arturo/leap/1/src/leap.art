@@ -1,0 +1,7 @@
+isLeap?: function [year][
+    and?
+        [zero? year % 4]
+        [or?
+            [not? zero? year % 100]
+            [zero? year % 400]]
+]

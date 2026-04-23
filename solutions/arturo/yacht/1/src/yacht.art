@@ -1,0 +1,38 @@
+; For Junko F. Didi and Shree DR.MDD
+
+yacht: function [roll group][
+    case group [
+        "ones"   -> tally roll 1
+        "twos"   -> tally roll 2
+        "threes" -> tally roll 3
+        "fours"  -> tally roll 4
+        "fives"  -> tally roll 5
+        "sixes"  -> tally roll 6
+        "full house"      -> house roll
+        "four of a kind"  -> quad roll
+        "little straight" -> line roll @1..5
+        "big straight"    -> line roll @2..6
+        "choice"          -> sum roll
+        "yacht"           -> (one? size unique roll)? -> 50 -> 0
+    ]
+]
+
+tally: $[seq val] -> val * size select seq => [& = val]
+
+line: $[seq expected] -> ((sort seq) = expected)? -> 30 -> 0
+
+quad: $[seq][
+    ds: sort seq
+    switch or? [ds\0 = ds\3] [ds\1 = ds\4]
+        -> 4 * ds\2
+        -> 0
+]
+
+house: $[seq][
+    ds: sort seq
+    switch and? [or? [and? [ds\0 = ds\1] [ds\2 = ds\4]]
+                     [and? [ds\0 = ds\2] [ds\3 = ds\4]]]
+                [ds\0 <> ds\4]
+        -> sum seq
+        -> 0
+]

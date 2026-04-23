@@ -1,0 +1,12 @@
+squareRoot: function[radicand][
+    ; largest power of 4 less than or equal to the radicand
+    b: 4 ^ floor log radicand 4
+    sqrt: function [n b x][
+        when [
+            [zero? b]    -> x
+            [n >= x + b] -> sqrt (n - x + b) (b / 4) (b + x / 2)
+            true         -> sqrt n (b / 4) (x / 2)
+        ]
+    ]
+    sqrt radicand b 0
+]
