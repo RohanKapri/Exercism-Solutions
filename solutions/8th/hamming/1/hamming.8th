@@ -1,0 +1,20 @@
+: valid-lengths?
+  s:len rot s:len rot
+  n:= _swap
+  ;
+
+: hamming-counter
+  s:= !if r> n:1+ >r then
+  drop
+  ;
+
+: distance
+  valid-lengths? !if 2drop null ;; then
+
+  null s:/
+  swap null s:/
+  0 >r
+  ' hamming-counter a:2each
+  2drop
+  r>
+  ;
