@@ -1,0 +1,24 @@
+: triangle? \ n n n -- n n n T
+  with: n
+  3dup + < !if false ;then
+  3dup rot + < !if false ;then
+  3dup -rot + <
+  ;with
+;
+
+: equilateral? \ n n n -- T
+  triangle? !if 3drop false ;then
+  dup rot n:= if n:= else 2drop false then
+;
+: anyTwoEqual? \ n n n -- T  
+  2dup n:= if 3drop true ;then
+  third n:= if 2drop true else n:= then
+;
+: scalene? \ n n n -- T
+  triangle? !if 3drop false ;then
+  anyTwoEqual? not
+;
+: isosceles? \ n n n -- T
+  triangle? !if 3drop false ;then
+  anyTwoEqual?
+;

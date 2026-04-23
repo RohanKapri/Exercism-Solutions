@@ -1,0 +1,13 @@
+: >matrix \ s -- a
+  "\n" s:/
+  ( " " s:/ ) a:map
+  ( ' >n a:map ) a:map
+;
+
+: row \ s n -- a
+  swap >matrix swap n:1- a:_@
+;
+
+: column \ s n -- a
+  swap >matrix ( over n:1- a:_@ ) a:map nip
+;

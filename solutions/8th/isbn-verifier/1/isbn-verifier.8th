@@ -1,0 +1,15 @@
+( ) 1 10 a:generate a:rev constant multipliers
+
+: to-num dup "X" = if drop 10 else >n then ;
+: x-is-last? "X" s:search null? if drop true else 9 = then ;
+: isbn? \ s -- T
+   dup
+   /[0-9X\-]/ "" s:replace! s:len 0 n:= not if 2drop false ;then
+   drop
+   /[^0-9X]/ "" s:replace! 
+   s:len 10 = not if drop false ;then
+   x-is-last? not if drop false ;then
+   null s:/  
+   multipliers swap ( to-num n:* ) a:2map 
+   ( n:+ ) 0 a:reduce 11 n:mod 0 n:=
+;

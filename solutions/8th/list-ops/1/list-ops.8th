@@ -1,0 +1,31 @@
+: length \ a -- n
+  a:len nip
+;
+
+: append \ a a -- a
+  a:+
+;
+
+: concat \ a -- a
+  a:new swap ( ' a:push a:each! drop ) a:each! drop
+;
+
+: filter \ a w -- a
+  a:filter
+;
+
+: map \ a w -- a
+  a:map
+;
+
+: reverse \ a -- a
+  a:rev
+;
+
+: foldl \ a x w -- x'
+  swap a:reduce
+;
+
+: foldr \ a x w -- x'
+  swap rot a:rev -rot a:reduce
+;

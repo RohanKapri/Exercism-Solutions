@@ -1,0 +1,41 @@
+
+: ch-number? 48 57 n:between ;
+: encode-ch rot dup 
+    ch-number? if 2nip ;then
+    97 n:- n:* n:+ 26 n:mod 97 n:+ 
+;
+
+: split-string  \ s -- s
+   [5] s:/ " " a:join 
+;
+
+: coprime? dup 13 n:mod 0 = swap 2 n:mod 0 = or not ;
+
+: >code 
+   over coprime? !if 3drop null ;then
+   rot
+   s:lc /[^a-z0-9]/ "" s:replace!
+   ( dup 2over swap encode-ch  nip ) s:map  
+   split-string 2nip
+; 
+
+( ) 1 25 a:generate constant oneto25
+
+: find-mmi >r oneto25  
+       ( r@ n:* 26 n:mod 1 n:= ) a:filter 
+       0 a:@ nip 
+; 
+
+: decode-ch rot dup 
+     ch-number? if 
+        2nip 
+     else  
+        97 n:- swap n:- n:* 26 n:mod  97 n:+  
+     then 
+;
+
+: code> 
+   over coprime? !if 3drop null ;then
+   swap find-mmi rot " " "" s:replace!
+    ( dup 2over swap decode-ch  nip ) s:map  2nip
+;

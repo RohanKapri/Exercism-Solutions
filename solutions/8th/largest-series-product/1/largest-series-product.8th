@@ -1,0 +1,19 @@
+: s>arr null s:/ ' >n a:map ;
+: iota a:new ( I n:1- a:push ) rot times ;
+
+: invalid?
+  s:len r@ n:<
+  r@ 0 n:< or
+  over /[^[:digit:]]/ r:match nip 0 n:= not or
+;
+
+: largest-product \ s n -- n
+  >r
+  invalid? if drop rdrop null ;then
+  
+  s>arr
+  a:len r@ n:1- n:- iota
+  ( over swap r@ a:slice ' n:* 1 a:reduce ) a:map
+  ' n:max 0 a:reduce
+  rdrop nip
+;

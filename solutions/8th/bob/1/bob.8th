@@ -1,0 +1,67 @@
+needs python/any
+
+: question? \ s -- T
+  s:len if
+    -1 1 s:slice "?" s:=
+  else
+    drop false
+  then
+;
+
+: silent? \ s -- T
+  s:trim s:len 0 n:= nip
+;
+
+: no-lowercase? \ s -- T
+  dup s:uc s:=
+;
+
+: s>a \ s -- a
+  [1] s:/
+;
+
+: letter? \ s -- T
+  s:uc? swap s:lc? nip or
+;
+
+: has-letter? \ s -- T
+  s>a ' letter? a:any
+;
+
+: both? \ s w w -- T
+  >r >r dup
+  r> w:exec
+  swap r> w:exec
+  and
+;
+
+: yelling? \ s -- T
+  ' no-lowercase?
+  ' has-letter?
+  both?
+;
+
+: yelling-question? \ s -- T
+  ' yelling?
+  ' question?
+  both?
+;
+
+: replace-if-true \ s1 s2 w s3 -- s1/s3 s2
+  >r >r dup r>
+  w:exec if
+    nip r> swap
+  else
+    rdrop
+  then
+;
+
+
+: bob \ s -- s
+  "Whatever." swap
+  ' silent? "Fine. Be that way!" replace-if-true
+  ' question? "Sure." replace-if-true
+  ' yelling? "Whoa, chill out!" replace-if-true
+  ' yelling-question? "Calm down, I know what I'm doing!" replace-if-true
+  drop
+;
