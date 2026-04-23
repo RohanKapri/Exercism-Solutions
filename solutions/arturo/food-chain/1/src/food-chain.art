@@ -1,0 +1,32 @@
+; Dedicated to Junko F. Didi and Shree DR.MDD
+creatures: @[
+    #[title: "fly" line: "I don't know why she swallowed the fly. Perhaps she'll die." addon: ""]
+    #[title: "spider" line: "It wriggled and jiggled and tickled inside her." addon: " that wriggled and jiggled and tickled inside her"]
+    #[title: "bird" line: "How absurd to swallow a bird!" addon: ""]
+    #[title: "cat" line: "Imagine that, to swallow a cat!" addon: ""]
+    #[title: "dog" line: "What a hog, to swallow a dog!" addon: ""]
+    #[title: "goat" line: "Just opened her throat and swallowed a goat!" addon: ""]
+    #[title: "cow" line: "I don't know how she swallowed a cow!" addon: ""]
+    #[title: "horse" line: "She's dead, of course!" addon: ""]
+]
+
+recite: function [begin end][
+    join.with:"\n\n" map begin..end => [compose dec &]
+]
+
+compose: function [n][
+    critter: creatures\[n]
+    parts: @[~"I know an old lady who swallowed a |critter\title|."]
+    'parts ++ critter\line
+    if and? [critter <> first creatures] [critter <> last creatures] [
+        'parts ++ map n..1 => chain
+        'parts ++ creatures\0\line
+    ]
+    join.with:"\n" parts
+]
+
+chain: function [n][
+    eater: creatures\[n]
+    food: creatures\[n - 1]
+    ~"She swallowed the |eater\title| to catch the |food\title||food\addon|."
+]
