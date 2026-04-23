@@ -1,0 +1,61 @@
+!yamlscript/v0
+
+# Constants for error messages
+ERROR-MESSAGES =::
+  account-closed: 'account not open'
+  account-open: 'account already open'
+  invalid-amount: 'amount must be greater than 0'
+  insufficient-funds: 'amount must be less than balance'
+
+# Global account state
+account =: atom(nil)
+
+# Reset function for tests
+defn reset-test-state():
+  reset! account: nil
+
+# Main account operation handler
+defn bank-account(operations):
+  last:
+    for operation operations:
+      operation
+        .operation
+        .str('do-' _)
+        .call(operation)
+
+# Account operation implementations
+defn- do-open(op):
+  when deref(account):
+    die: ERROR-MESSAGES.account-open
+  reset! account: 0
+
+defn- do-close(op):
+  when-not deref(account):
+    die: ERROR-MESSAGES.account-closed
+  reset! account: nil
+
+defn- do-balance(op):
+  balance =: deref(account)
+  if-not balance:
+    die: ERROR-MESSAGES.account-closed
+    else: balance
+
+defn- do-deposit(op):
+  when-not deref(account):
+    die: ERROR-MESSAGES.account-closed
+  when op.amount <= 0:
+    die: ERROR-MESSAGES.invalid-amount
+  swap! account +: op.amount
+
+defn- do-withdraw(op):
+  balance =: deref(account)
+  when-not balance:
+    die: ERROR-MESSAGES.account-closed
+
+  cond:
+    op.amount <= 0: 
+      die: ERROR-MESSAGES.invalid-amount
+    op.amount > balance: 
+      die: ERROR-MESSAGES.insufficient-funds
+    else: 
+      swap! account -: op.amount

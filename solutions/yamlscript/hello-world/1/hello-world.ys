@@ -1,0 +1,4 @@
+!YS-v0
+
+defn hello():
+  'Hello, World!'
