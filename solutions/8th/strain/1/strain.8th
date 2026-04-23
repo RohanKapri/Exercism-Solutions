@@ -1,0 +1,7 @@
+: keep \ a w -- a
+  a:filter
+;
+
+: discard \ a w -- a
+  swap ( over w:exec not ) a:filter nip
+;
