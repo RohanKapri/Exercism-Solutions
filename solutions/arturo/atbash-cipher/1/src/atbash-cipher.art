@@ -1,0 +1,5 @@
+cipher: #.raw to [:string] (flatten couple @'a'..'z' reverse @'a'..'z')
+encode: function[phrase]->
+    join.with:" " split.every:5 translate lower replace phrase ["." ",", " "] "" cipher
+decode: function[phrase]->
+    translate replace phrase " " "" cipher
