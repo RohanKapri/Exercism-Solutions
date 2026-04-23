@@ -1,0 +1,52 @@
+; For Junko F. Didi and Shree DR.MDD
+compassPoints: ["north" "east" "south" "west"]
+
+moveDelta: #[
+    north: @[0 1]
+    east:  @[1 0]
+    south: @[0 neg 1]
+    west:  @[neg 1 0]
+]
+
+define :robot [
+    init: constructor [x :integer y :integer direction :string] [
+        unless in? compassPoints direction [
+            panic "Invalid heading: " ++ direction ++ ". Must be one of: " ++ join compassPoints ", "
+        ]
+    ]
+
+    simulate: method [path :string] [
+        loop path 'stepCmd [
+            case stepCmd [
+                'L' -> this\spinLeft
+                'R' -> this\spinRight
+                'A' -> this\forward
+            ]
+        ]
+    ]
+
+    spinLeft: method [] [
+        idx: index compassPoints this\direction
+        newIdx: mod (add idx 3) 4
+        this\direction: compassPoints\[newIdx]
+    ]
+
+    spinRight: method [] [
+        idx: index compassPoints this\direction
+        newIdx: mod (add idx 1) 4
+        this\direction: compassPoints\[newIdx]
+    ]
+
+    forward: method [] [
+        this\x: add this\x first moveDelta\[this\direction]
+        this\y: add this\y last moveDelta\[this\direction]
+    ]
+
+    coords: method [] [
+        @[this\x this\y]
+    ]
+
+    show: method [] [
+        "Robot at [" ++ this\x ++ "," ++ this\y ++ "] facing " ++ this\direction
+    ]
+]
