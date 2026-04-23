@@ -1,0 +1,6 @@
+!yamlscript/v0
+
+defn transform(legacy):
+  into {}:
+    for [score words] legacy, word words:
+      -[lc(word) to-int(score)]
