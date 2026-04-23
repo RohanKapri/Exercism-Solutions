@@ -1,0 +1,19 @@
+: valid_position? \ n - T
+  0 7 n:between
+;
+
+: create \ n n -- x
+  2dup valid_position? swap valid_position? and if 
+    2 a:close 
+  else 
+    2drop null 
+  then
+;
+
+: can-attack? \ x x -- n
+  a:open rot a:open \ x1 y1 x2 y2
+  rot swap n:- n:abs \ dx
+  -rot swap n:- n:abs \ dx dy
+  2dup 0 n:= swap 0 n:= or if 2drop true else \ Row or column attack
+  n:= then \ Diagonal check
+;
