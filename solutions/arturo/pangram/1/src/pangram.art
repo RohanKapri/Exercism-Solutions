@@ -1,0 +1,9 @@
+pangram?: function [phrase][
+    26 = (
+        phrase
+        | upper
+        | select 'c [upper? c]
+        | unique
+        | size
+    )
+]
