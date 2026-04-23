@@ -1,0 +1,9 @@
+!yamlscript/v0
+
+defn color-code(color):
+  zipmap(colors() range()).$color
+
+defn colors():
+  qw(black brown red orange yellow
+     green blue violet grey white)
+  
