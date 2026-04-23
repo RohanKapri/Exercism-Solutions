@@ -1,0 +1,14 @@
+keep: function [values :block fn :literal][
+    when [
+        empty? values -> []
+        [call fn @[values\0]] -> insert keep drop values fn 0 values\0
+        any -> keep drop values fn
+    ]
+]
+discard: function [values :block fn :literal][
+    when [
+        empty? values -> []
+        [call fn @[values\0]] -> discard drop values fn
+        any -> insert discard drop values fn 0 values\0
+    ]
+]
