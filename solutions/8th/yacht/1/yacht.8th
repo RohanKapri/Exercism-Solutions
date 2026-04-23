@@ -1,0 +1,27 @@
+
+: count?    \ a n -- n     
+>r ( r@ n:= if n:1+ then ) 0 a:reduce rdrop ;  
+
+: sumfaces \ a -- n  
+' n:+ 0 a:reduce ;  
+  
+{  
+ "ones"  : ( 1 count? ) ,  
+ "twos" : ( 2 count? 2 n:* ) ,  
+ "threes" : ( 3 count? 3 n:* ) ,  
+ "fours" : ( 4 count? 4 n:* ) ,  
+ "fives" : ( 5 count? 5 n:* ) ,  
+ "sixes" : ( 6 count? 6 n:* ) ,  
+ "full house" : ( dup sumfaces >r dup 1 a:@ count? >r -2 a:@ count? r> n:+ 5 n:= if r> else rdrop 0 then ) ,  
+ "four of a kind" : ( dup 0 a:@ count? 3 n:> if 0 a:@ 4 n:* nip else dup -1 a:@ count? 3 n:> if -1 a:@ 4 n:* nip else drop 0 then then ) ,  
+ "little straight" : ( [ 1,2,3,4,5 ] ' n:= a:= nip nip if 30 else 0 then ) ,  
+ "big straight" : ( [ 2,3,4,5,6 ] ' n:= a:= nip nip if 30 else 0 then ) ,  
+ "choice" : ' sumfaces  ,  
+ "yacht" : ( 0 a:@ count? 5 n:= if 50 else 0 then )   
+} constant categories  
+  
+: play_yacht  \ a s -- n  
+swap ' n:cmp a:sort swap
+categories  
+caseof  
+;  
