@@ -1,0 +1,7 @@
+clean: function [phrase][
+    m: phrase
+       | replace {/[() .+-]/} ""
+       | match.capture {/^1?([2-9]\d\d[2-9]\d\d\d{4})$/}
+
+    switch empty? m -> null -> first m
+]
