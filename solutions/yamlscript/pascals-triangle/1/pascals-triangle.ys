@@ -1,0 +1,7 @@
+!yamlscript/v0
+
+pascal-sequence =:
+  iterate: \(mapv add cons(0 _) conj(_ 0)) [1]
+
+defn rows(requested-count):
+  take requested-count: pascal-sequence
