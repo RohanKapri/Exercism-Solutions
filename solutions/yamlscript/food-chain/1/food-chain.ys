@@ -1,0 +1,28 @@
+!yamlscript/v0
+animals-and-comments =::
+- fly: I don't know why she swallowed the fly. Perhaps she'll die.
+- spider: It wriggled and jiggled and tickled inside her.
+- bird: How absurd to swallow a bird!
+- cat: Imagine that, to swallow a cat!
+- dog: What a hog, to swallow a dog!
+- goat: Just opened her throat and swallowed a goat!
+- cow: I don't know how she swallowed a cow!
+- horse: She's dead, of course!
+defn recite(start-verse end-verse):
+  reduce(build-verse [] (start-verse.-- .. end-verse.--)):drop-last
+defn build-verse(accumulated-verses current-verse):
+  current-animal =: animals-and-comments.$current-verse.first().0
+  accumulated-verses .=: conj("I know an old lady who swallowed a $current-animal.")
+  accumulated-verses .=: conj(animals-and-comments.$current-verse.first().1)
+  conj _ '':
+    or _ accumulated-verses:
+      when 0 < current-verse < animals-and-comments.#.--:
+        conj _ animals-and-comments.0:first.1:
+          reduce _ accumulated-verses (current-verse .. 1):
+            fn(verse-lines verse-num):
+              conj verse-lines:
+                predator =: animals-and-comments.$verse-num.first().0
+                prey =: animals-and-comments.nth(verse-num.--):first.0
+                S("She swallowed the $predator to catch the $prey."):
+                  .call(fn([line] if((prey != 'spider') line
+                   replace(line /\./ replace(animals-and-comments.1:first.1 /It/ ' that'))))_)
