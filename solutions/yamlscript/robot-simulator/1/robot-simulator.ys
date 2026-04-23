@@ -1,0 +1,46 @@
+!yamlscript/v0
+
+# Direction mappings
+next-direction =::
+  north: east
+  east: south
+  south: west
+  west: north
+
+prev-direction =::
+  north: west
+  west: south
+  south: east
+  east: north
+
+# Movement functions for each direction
+defn- move-north(position): update(position 'y' inc)
+defn- move-east(position):  update(position 'x' inc)
+defn- move-south(position): update(position 'y' dec)
+defn- move-west(position):  update(position 'x' dec)
+
+# Movement mapping
+directions =: -{'north' move-north
+                'east'  move-east
+                'south' move-south
+                'west'  move-west}
+
+defn create(position direction):
+  -{'position' position 'direction' direction}
+
+defn- turn-right(robot):
+  update(robot 'direction' next-direction)
+
+defn- turn-left(robot):
+  update(robot 'direction' prev-direction)
+
+defn- advance(robot):
+  update(robot 'position' directions(robot.direction))
+
+defn move(position direction instructions):
+  reduce _ create(position direction) instructions:
+    fn(robot command):
+      case command:
+        \\A: advance(robot)
+        \\R: turn-right(robot)
+        \\L: turn-left(robot)
