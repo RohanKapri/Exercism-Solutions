@@ -1,0 +1,19 @@
+: scores \ a -- a
+    
+;
+
+: latest \ a -- n
+    -1 a:@ nip 
+;
+
+: sort-descending
+   ( n:cmp 0 swap n:- )  a:sort
+;
+
+: personal-best \ a -- n
+      ( n:max ) -99999 a:reduce
+;
+
+: personal-top-three \ a -- a
+    sort-descending 0 3 a:slice
+;
