@@ -1,0 +1,1 @@
+END { n = $0; for ($0 = 0; n > 0; n = int(n / 2)) $0 += n % 2; print }
