@@ -1,0 +1,24 @@
+unique type sublist.SublistType = Equal | Sublist | Superlist | Unequal
+
+sublist.sublist : [a] -> [a] -> SublistType
+sublist.sublist lst1 lst2 =
+  use List size
+  startsWith : [a] -> [a] -> Boolean
+  startsWith = cases
+    [], _ -> true
+    _, [] -> false
+    (ha +: ta), (hb +: tb)  | ha === hb -> startsWith ta tb
+                            | otherwise -> false
+
+  isSublist : [a] -> [a] -> Boolean
+  isSublist a b =
+    if startsWith a b then true
+    else match b with
+      _ +: tb -> (startsWith a tb) || (isSublist a tb)
+      _ -> false
+
+  if size lst1 < size lst2 then
+    if isSublist lst1 lst2 then Sublist else Unequal
+  else if size lst2 < size lst1 then
+    if isSublist lst2 lst1 then Superlist else Unequal
+  else if isSublist lst1 lst2 then Equal else Unequal
