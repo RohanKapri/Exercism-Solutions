@@ -1,0 +1,55 @@
+unique type kindergartenGarden.Plant
+  = Clover
+  | Grass
+  | Radishes
+  | Violets
+
+unique type kindergartenGarden.Garden
+  = { students: [Text],
+      plants: [[kindergartenGarden.Plant]]  }
+
+{{
+  Accepts a list of students' names and raw garden diagram and returns Garden type.
+}}
+kindergartenGarden.garden : [Text] -> Text -> Garden
+kindergartenGarden.garden studentNames diagramText =
+  Garden
+    studentNames
+    (fromDiagram diagramText)
+
+{{
+  Accepts student's name and Garden and returns list of plants.
+}}
+kindergartenGarden.lookupPlants : Text -> Garden -> [Plant]
+kindergartenGarden.lookupPlants studentName garden =
+  indexedStudents = List.indexed (Garden.students garden)
+  filteredStudents = List.filter (pair -> at1 pair == studentName) indexedStudents
+  studentIndices = List.map at2 filteredStudents
+  studentIndex = List.foldLeft (+) 0 studentIndices
+  Optional.getOrElse [] (List.at studentIndex (Garden.plants garden))
+
+kindergartenGarden.fromDiagram : Text -> [[Plant]]
+kindergartenGarden.fromDiagram diagramText =
+  lines = Text.lines diagramText
+  chunkedLines = List.map (Text.chunk 2) lines
+  firstRow = Optional.getOrElse [] (List.head chunkedLines)
+  secondRow = Optional.getOrElse [] (List.last chunkedLines)
+  combinedRows = List.zipWith (Text.++) firstRow secondRow
+  List.map toPlants combinedRows
+
+kindergartenGarden.toPlants : Text -> [Plant]
+kindergartenGarden.toPlants plantCodes =
+  parsePlants accumulator remainingCodes =
+    if Text.isEmpty remainingCodes then
+      accumulator
+    else if Text.startsWith "C" remainingCodes then
+      parsePlants (accumulator :+ Clover) (Text.drop 1 remainingCodes)
+    else if Text.startsWith "G" remainingCodes then
+      parsePlants (accumulator :+ Grass) (Text.drop 1 remainingCodes)
+    else if Text.startsWith "R" remainingCodes then
+      parsePlants (accumulator :+ Radishes) (Text.drop 1 remainingCodes)
+    else if Text.startsWith "V" remainingCodes then
+      parsePlants (accumulator :+ Violets) (Text.drop 1 remainingCodes)
+    else
+      parsePlants accumulator (Text.drop 1 remainingCodes)
+  parsePlants [] plantCodes
