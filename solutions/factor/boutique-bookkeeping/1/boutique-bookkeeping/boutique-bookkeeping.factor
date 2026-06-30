@@ -1,0 +1,20 @@
+USING: kernel math math.parser sequences sorting ;
+IN: boutique-bookkeeping
+
+: sort-by-price ( inventory -- sorted )
+    [ second ] sort-by ;
+
+: with-missing-price ( inventory -- filtered )
+    [ second f = ] filter ;
+
+: expensive-items ( inventory threshold -- count )
+    swap [ second < ] with count ;
+
+: cheapest-item ( inventory -- item )
+    [ second ] minimum-by ;
+
+: total-price ( inventory -- sum )
+    [ second ] map-sum ;
+
+: format-price-tag ( item -- str )
+    [ first ": $" append ] [ second number>string ] bi append ;
