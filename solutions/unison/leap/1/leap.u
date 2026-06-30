@@ -1,0 +1,7 @@
+leap.leap : Nat -> Boolean
+leap.leap = cases
+  y 
+    | Nat.mod y 400 Nat.== 0 -> true
+    | Nat.mod y 100 Nat.== 0 -> false
+    | Nat.mod y 4 Nat.== 0   -> true
+    | otherwise              -> false
