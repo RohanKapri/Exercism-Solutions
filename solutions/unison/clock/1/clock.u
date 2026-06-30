@@ -1,0 +1,76 @@
+use Int - mod / toText
+use Text ++
+
+unique type Time  = Time Int Int
+
+{{
+Normalize a time so that:
+    0 <= hours < 24
+    0 <= minutes < 60
+}}
+Time.normalize = cases  
+  Time hours minutes -> 
+      hours' = mod (hours + (minutes / +60)) +24
+      minutes' = mod minutes +60
+      Time hours' minutes'
+
+{{
+Construct a normalized time
+}}
+Time.new: Int -> Int -> Time
+Time.new = compose2 normalize Time
+
+leftPad len c orig =
+  use Nat - 
+  needed = len - Text.size orig
+  if needed > 0 then
+      fromCharList (List.replicate needed 'c) ++ orig
+  else orig
+
+Time.toText = cases
+  Time hours minutes ->
+     (leftPad 2 ?0 (toText hours)) ++ ":" ++ (leftPad 2 ?0 (toText minutes))
+
+
+{{
+  Given an hour and minute value represented as positive or negative numbers, return the "clock time" in text form.
+
+  For example:
+  `create +23 +5` should be "23:05"
+
+  Negative arguments should be supported:
+  `create -1 +15` should be "23:15"
+
+  Values over the traditional hour or minute values should roll over:
+  `create +1 +65` should be "02:05"
+}}
+create : Int -> Int -> Text
+create = compose2 Time.toText Time.new
+
+{{
+  {add} is a function which takes in an hour and minutes representing the initial time, and a third argument representing the number of minutes to add.
+
+  The minutes to add may be values over 60:
+  `add +0 +45 +160` should be "03:25"
+}}
+add : Int -> Int -> Int -> Text
+add hour min additionalMinutes = 
+  create hour (min + additionalMinutes)
+
+{{
+  {subtract} is a function which takes in an hour and minutes representing the initial time, and a third argument representing the number of minutes to subtract
+
+  `subtract +10 +3 +4` should be "09:59"
+}}
+subtract : Int -> Int -> Int -> Text
+subtract hours minutes minutesSubtract = 
+  create hours (minutes - minutesSubtract)
+
+{{
+  {equal} is a function which takes in two hour and minute pairs representing the initial times, returning if the resulting clock values are the same.
+
+  For example, `equal (+25, +0) (+1, 0)` should be `true` because they both represent the same clock value time.
+}}
+equal : (Int, Int) -> (Int, Int) -> Boolean
+equal clock1 clock2 =
+  (uncurry Time.new clock1) === (uncurry Time.new clock2)
