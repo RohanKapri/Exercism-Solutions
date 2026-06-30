@@ -1,0 +1,36 @@
+{{ Constants }}
+luhn.midpoint : Nat
+luhn.midpoint = 5
+
+luhn.maxSingleDigitSum : Nat
+luhn.maxSingleDigitSum = 9
+
+luhn.decimalBase : Nat
+luhn.decimalBase = 10
+
+luhn.asciiOffsetZero : Nat
+luhn.asciiOffsetZero = 48
+
+{{ Double a number. If greater than 9 then subtract 9. }}
+luhn.doubleAndSubtractIfGreaterThanNine : Nat -> Nat
+luhn.doubleAndSubtractIfGreaterThanNine = cases 
+    n | n >= luhn.midpoint -> n * 2 - luhn.maxSingleDigitSum
+      | otherwise -> n * 2
+
+{{ Convert a string to a list of digits. }}
+luhn.toDigits : Text -> List Nat
+luhn.toDigits string = 
+    digits = string |> toCharList 
+                    |> List.filter (compose not isWhitespace) 
+                    |> List.map (c -> Char.toNat c - luhn.asciiOffsetZero)
+    if (List.filter (inRange 0 luhn.decimalBase) digits) !== digits then [] else digits
+
+luhn.isValid : Text -> Boolean
+luhn.isValid s =
+    digits = toDigits s |> List.reverse
+    match digits with 
+        d | size d <= 1 -> false
+          | otherwise -> 
+                alternateDigits = d |> List.skip 1
+                doubledDigits = d |> List.drop 1 |> List.skip 1 |> List.map doubleAndSubtractIfGreaterThanNine
+                List.interleave alternateDigits doubledDigits |> List.foldLeft (+) 0 |> (sum -> mod sum luhn.decimalBase) == 0
