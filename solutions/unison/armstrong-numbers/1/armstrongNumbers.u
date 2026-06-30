@@ -1,0 +1,16 @@
+armstrongNumbers.isArmstrongNumber : Nat -> Boolean
+armstrongNumbers.isArmstrongNumber number = 
+  dc = armstrongNumbers.digitCount number
+  go acc n =
+    if n === 0 then acc
+    else
+      r = Nat.mod n 10
+      rest = Nat.div n 10
+      go (acc + (Nat.pow r dc)) rest
+
+  go 0 number == number
+
+armstrongNumbers.digitCount : Nat -> Nat
+armstrongNumbers.digitCount = cases
+  n | n < 10 -> 1
+  n -> 1 + armstrongNumbers.digitCount (Nat.div n 10)
