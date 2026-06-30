@@ -1,0 +1,23 @@
+sumOfMultiples.sumOfMultiples : [Nat] -> Nat -> Nat
+sumOfMultiples.sumOfMultiples targets upperBound =
+  use Nat * + - / mod
+  
+  T n = n * (n+1) / 2
+
+  gcd a = cases
+    0 -> a
+    b -> gcd b (mod a b)
+
+  lcm a b = a * b / gcd a b
+
+  go mult N xs = 
+    if mult > N then 0
+    else
+      match xs with
+        [] -> 0
+        a +: rest ->
+          m = lcm mult a
+          T (N / m) * m + go mult N rest - go m N rest
+  
+  targets' = List.filter (x -> x Nat.!= 0) targets
+  go 1 (upperBound - 1) targets'
