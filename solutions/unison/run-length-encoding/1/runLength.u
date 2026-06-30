@@ -1,0 +1,37 @@
+runLengthEncoding.encode : Text -> Text
+runLengthEncoding.encode =
+  encodeGroup : List.Nonempty Char -> Text
+  encodeGroup charGroup =
+    use List.Nonempty size head
+    char = head charGroup |> Char.toText
+    encodeCount (size charGroup) ++ char
+
+  encodeCount : Nat -> Text
+  encodeCount count =
+    if count == 1 then "" else Nat.toText count
+
+  toCharList >> groupConsecutive >> foldMap encodeGroup (++) ""
+
+runLengthEncoding.decode : Text -> Text
+runLengthEncoding.decode encodedText =
+  go : Text -> Text -> Text
+  go accumulatedText remainingText =
+    if Text.isEmpty remainingText then
+      accumulatedText
+    else
+      match decodeCount remainingText with
+        None ->
+          go (accumulatedText ++ take 1 remainingText) (drop 1 remainingText)
+        Some (count, restText) ->
+          decodedChars = repeat count (take 1 restText)
+          go (accumulatedText ++ decodedChars) (drop 1 restText)
+
+  decodeCount : Text -> Optional (Nat, Text)
+  decodeCount text =
+    match break (not << isDigit) text with
+      ("", _) -> None
+      (countString, restText) ->
+        count = Nat.fromText countString |> getOrBug(countString ++ " must be [0-9]+")
+        Some (count, restText)
+
+  go "" encodedText
