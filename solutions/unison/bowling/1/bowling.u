@@ -1,0 +1,28 @@
+bowling.sum : Nat -> [Nat] -> Nat
+bowling.sum n arr = List.foldLeft (Nat.+) 0 (take n arr)
+
+use Either Right Left
+
+{{ This type is used to capture the expected error message }}
+unique type bowling.Error = Error Text
+
+{{
+  {score} takes in a list of numbers representing the pins knocked down for each roll of the bowling game, and should return either the total score or an error.
+}}
+bowling.score : [Nat] -> Either Error Nat
+bowling.score rolls =
+  use Nat + ==
+  go : Nat -> Nat -> [Nat] -> Nat
+  go acc = cases
+    10, [] -> acc
+    9, 10 +: rest    | size rest == 2 -> acc + 10 + (sum 2 rest)
+    9, [a,b] ++ rest | a+b == 10 && (size rest == 1) -> acc + 10 + sum 1 rest
+                     | a+b < 10 -> go (acc + a+b) 10 rest
+    n, 10 +: rest    | size rest >= 2 -> go (acc + 10 + sum 2 rest) (n+1) rest
+    n, [a,b] ++ rest | a+b == 10 && (size rest >= 1) -> go (acc + 10 + sum 1 rest) (n+1) rest
+                     | a+b < 10 -> go (acc + a +b) (n+1) rest
+    _, _ -> throw (Error "Score cannot be taken until the end of the game")
+
+
+  toEither do
+    go 0 0 rolls
