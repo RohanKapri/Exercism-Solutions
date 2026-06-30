@@ -1,0 +1,25 @@
+
+sieve.primes : Nat ->{} [Nat]
+sieve.primes limit = unsafeRun! do Scope.run do
+  array = mutable.Array.of None (limit + 2)
+
+  Each.run do
+    n = Each.range 0 (limit + 1)
+    Array.write array n (Some n)
+
+  next n = if n > limit then None else
+    if Array.read array n === None then next (n+1) else Some n
+
+  filter n m =
+    if m > limit then ()
+    else Array.write array m None
+         filter n (m+n)
+
+  loop n = match next n with
+    Some p -> filter n (n+n)
+              loop (n+1)
+    None -> ()
+
+  loop 2 
+  Array.freeze array |> Array.toList |> List.drop 2 |> somes
+    
