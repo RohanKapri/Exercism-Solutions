@@ -1,0 +1,8 @@
+queenAttack.create : (Nat,Nat) -> {Abort} (Nat,Nat)
+queenAttack.create = cases
+  (file, rank) | file > 7 || (rank > 7) -> abort
+  position -> position
+
+queenAttack.canAttack  : (Nat,Nat) -> (Nat,Nat) -> {Abort} Boolean
+queenAttack.canAttack = cases
+  (file1, rank1), (file2, rank2) -> file1 == file2 || (rank1 == rank2) || (diff file1 file2 == diff rank1 rank2)
