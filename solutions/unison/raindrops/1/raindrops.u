@@ -1,0 +1,22 @@
+raindrops.convert : Nat -> Text
+raindrops.convert n = 
+  -- Helper function to match the number and return corresponding raindrop sound
+  raindrops.matchMod : Nat -> Text
+  raindrops.matchMod m = 
+    if Nat.mod n m == 0 then
+      match m with
+        3 -> "Pling"
+        5 -> "Plang"
+        7 -> "Plong"
+        _ -> ""  -- This case is never reached as we only pass 3, 5, or 7
+    else
+      ""  -- Return an empty string if n is not divisible by m
+
+  -- List of divisors to check
+  divisors = [3, 5, 7]
+
+  -- Apply matchMod to each divisor and concatenate the results
+  result = List.map raindrops.matchMod divisors |> List.foldLeft (Text.++) ""
+  
+  -- If result is empty, return the number as a string, otherwise return the concatenated result
+  if Text.isEmpty result then Nat.toText n else result
