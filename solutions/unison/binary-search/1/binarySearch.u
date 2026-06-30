@@ -1,0 +1,26 @@
+use data Array
+
+binarySearch.find : Array Nat -> Nat -> Optional Int
+binarySearch.find array target =
+  binarySearch.go array target +0 (size array)
+
+binarySearch.go : Array Nat -> Nat -> Int -> Nat -> Optional Int
+binarySearch.go array target start len =
+  mid = start Int.+ Nat.toInt (len Nat./ 2)
+  if len == 0 then None
+  else
+    binarySearch.getElement array mid |> cases
+      None -> None
+      Some x ->
+        if x == target then Some mid
+        else if x < target then
+          binarySearch.go array target (mid Int.+ +1) (len - (len Nat./ 2) - 1)
+        else
+          binarySearch.go array target start (len Nat./ 2)
+
+binarySearch.getElement : Array Nat -> Int -> Optional Nat
+binarySearch.getElement array index =
+  use data.Array at!
+  match Nat.fromInt index with
+    None -> None
+    Some validIndex -> Abort.toOptional! do at! validIndex array
