@@ -1,0 +1,14 @@
+rotationalCipher.rotate : Text -> Nat -> Text
+rotationalCipher.rotate text shiftKey =
+  baseA = Char.toNat ?A
+  basea = Char.toNat ?a
+  rot num = cases
+    c | isLetter c ->
+        (%) = Nat.mod
+        base = if isUpper c then baseA else basea
+        (Char.toNat c + num - base) % 26 + base
+          |> Char.fromNat
+          |> Optional.getOrBug "unexpected char"
+      | otherwise -> c
+
+  Text.map (rot shiftKey) text
