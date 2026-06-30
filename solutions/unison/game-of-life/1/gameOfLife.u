@@ -1,0 +1,49 @@
+gameOfLife.adjacentOffsets : [(Nat, Nat)]
+gameOfLife.adjacentOffsets = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
+
+gameOfLife.generateAllPositions : Nat -> Nat -> [(Nat, Nat)]
+gameOfLife.generateAllPositions rowCount columnCount =
+  Each.toList do (Each.range 1 (1 + rowCount), Each.range 1 (1 + columnCount))
+
+gameOfLife.createBoardMap : [[Nat]] -> Map (Nat, Nat) Nat
+gameOfLife.createBoardMap matrix =
+  rowCount = List.size matrix
+  columnCount = List.head matrix |> Optional.getOrElse [] |> List.size
+  allPositions = gameOfLife.generateAllPositions rowCount columnCount
+  allCells = List.join matrix
+  Map.fromList (List.zip allPositions allCells)
+
+gameOfLife.countLiveNeighbors : (Nat, Nat) -> Map (Nat, Nat) Nat -> Nat
+gameOfLife.countLiveNeighbors centerPos boardMap =
+  isLive pos = 
+    match Map.get pos boardMap with
+      Some 1 -> 1
+      _      -> 0
+  
+  adjacentPositions = 
+    List.map 
+      (offset -> 
+        ( (at1 centerPos + (at1 offset) - 1)
+        , (at2 centerPos + (at2 offset) - 1)
+        )
+      ) 
+      gameOfLife.adjacentOffsets
+  
+  List.map isLive adjacentPositions |> Nat.sum
+
+gameOfLife.nextState : (Nat, Nat) -> Map (Nat, Nat) Nat -> Nat
+gameOfLife.nextState pos boardMap =
+  alive = Map.get pos boardMap |> Optional.getOrElse 0
+  neighbors = gameOfLife.countLiveNeighbors pos boardMap
+  if (neighbors == 3) || ((alive == 1) && (neighbors == 2)) then 1 else 0
+
+gameOfLife.tick : [[Nat]] -> [[Nat]]
+gameOfLife.tick matrix =
+  if matrix === [] then [] else
+    columnCount = List.head matrix |> Optional.getOrElse [] |> List.size
+    if columnCount == 0 then matrix else
+      rowCount = List.size matrix
+      boardMap = gameOfLife.createBoardMap matrix
+      allPositions = gameOfLife.generateAllPositions rowCount columnCount
+      nextCells = List.map (pos -> gameOfLife.nextState pos boardMap) allPositions
+      List.chunk columnCount nextCells
