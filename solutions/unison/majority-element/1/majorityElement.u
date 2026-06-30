@@ -1,0 +1,9 @@
+unique type majorityElement.Color = Red | Orange | Yellow | Green | Blue | Purple
+
+majorityElement.majorityFinder : [majorityElement.Color] -> Optional majorityElement.Color
+majorityElement.majorityFinder elements =
+  elements
+    |> Bag.fromList
+    |> Bag.occurrenceList
+    |> findMap (cases (e, count) | toFloat(count) / toFloat(size elements) > 0.5 -> Some e
+                      _ -> None)
