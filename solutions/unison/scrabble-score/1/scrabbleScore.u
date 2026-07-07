@@ -1,0 +1,17 @@
+scrabbleScore.getCharacterScore : Char -> Nat
+scrabbleScore.getCharacterScore character =
+  match toUppercase character with
+    uppercaseChar | List.contains uppercaseChar [?A, ?E, ?I, ?O, ?U, ?L, ?N, ?R, ?S, ?T] -> 1
+    uppercaseChar | List.contains uppercaseChar [?D, ?G] -> 2
+    uppercaseChar | List.contains uppercaseChar [?B, ?C, ?M, ?P] -> 3
+    uppercaseChar | List.contains uppercaseChar [?F, ?H, ?V, ?W, ?Y] -> 4
+    uppercaseChar | List.contains uppercaseChar [?J, ?X] -> 8
+    uppercaseChar | List.contains uppercaseChar [?Q, ?Z] -> 10
+    ?K -> 5
+    _ -> 0
+
+scrabbleScore.score : Text -> Nat
+scrabbleScore.score word =
+  word
+    |> toCharList
+    |> List.foldLeft (totalScore character -> totalScore + getCharacterScore character) 0
