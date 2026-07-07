@@ -1,0 +1,19 @@
+pangram.isPangram : Text -> Boolean
+pangram.isPangram sentence =
+  Text.toCharList "abcdefghijklmnopqrstuvwxyz"
+    |> List.all (
+         letter ->
+           Text.toLowercase sentence
+             |> Text.toCharList
+             |> uniqueList 
+             |> List.contains letter
+       )
+
+uniqueList : List a -> List a
+uniqueList list =
+  List.foldLeft ( seen x ->
+    if List.contains x seen then
+      seen
+    else
+      seen ++ [x]  -- Use ++ for list concatenation
+  ) [] list
