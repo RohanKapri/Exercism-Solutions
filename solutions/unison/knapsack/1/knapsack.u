@@ -1,0 +1,27 @@
+knapsack.maximumValue : Nat -> [(Nat, Nat)] -> Nat
+knapsack.maximumValue maximumWeight items =
+  knapsack.helper maximumWeight items
+
+knapsack.helper : Nat -> [(Nat, Nat)] -> Nat
+knapsack.helper maximumWeight items =
+  if maximumWeight == 0 then
+    0
+  else
+    knapsack.processItems maximumWeight items
+
+knapsack.processItems : Nat -> [(Nat, Nat)] -> Nat
+knapsack.processItems maximumWeight items =
+  match items with
+    [] -> 0
+    (weight, value) +: rest ->
+      if weight > maximumWeight then
+        knapsack.helper maximumWeight rest
+      else
+        knapsack.chooseMaxValue maximumWeight weight value rest
+
+knapsack.chooseMaxValue : Nat -> Nat -> Nat -> [(Nat, Nat)] -> Nat
+knapsack.chooseMaxValue maximumWeight weight value rest =
+  Nat.max
+    (value + knapsack.helper (maximumWeight - weight) rest)
+    (knapsack.helper maximumWeight rest)
+    
