@@ -1,0 +1,38 @@
+structural type LinkedList a = nil | cons a (LinkedList a)
+
+LinkedList.foldRight : (a -> b -> b) -> b -> LinkedList a -> b
+LinkedList.foldRight f b = cases
+  cons a as -> f a (LinkedList.foldRight f b as)
+  nil -> b
+
+LinkedList.foldLeft : (b -> a -> b) -> b -> LinkedList a -> b
+LinkedList.foldLeft f b = cases
+  cons a as -> f (foldLeft f b as) a
+  nil -> b
+
+LinkedList.new : a -> LinkedList a
+LinkedList.new a = cons a nil
+
+LinkedList.fromList : [a] -> LinkedList a
+LinkedList.fromList = List.foldRight cons nil
+
+LinkedList.isNil : LinkedList a -> Boolean
+LinkedList.isNil = cases
+  nil -> true
+  _ -> false
+
+LinkedList.head : LinkedList a -> Optional a
+LinkedList.head = cases
+  nil -> None
+  cons a _ -> Some a
+
+LinkedList.tail : LinkedList a -> LinkedList a
+LinkedList.tail = cases 
+  nil -> nil
+  cons _ t -> t
+
+LinkedList.reverseLinkedList : LinkedList a -> LinkedList a
+LinkedList.reverseLinkedList = foldLeft (flip cons) nil
+
+LinkedList.toList : LinkedList a -> [a]
+LinkedList.toList = foldRight (+:) [] 
