@@ -1,0 +1,20 @@
+diamond.rows : Char -> [Text]
+diamond.rows letter =
+  triangle : Char -> [Text]
+  triangle = cases
+    ?A -> ["A"]
+    c ->
+      (Char.toNat c) - 1
+        |> Char.fromNat
+        |> getOrElse ?A
+        |> triangle
+        |> List.map (row -> " " ++ row ++ " ")
+        |> (cases
+          rec@(h +: tail) -> 
+            row = Char.toText c ++ (Text.repeat ((Text.size h) - 2) " ") ++ Char.toText c 
+            rec :+ row
+          _ -> [] -- this should never happen
+        )
+  
+  triangle letter
+    |> (tri -> tri ++ (tri |> reverse |> drop 1))
