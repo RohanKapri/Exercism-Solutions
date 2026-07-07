@@ -1,0 +1,32 @@
+change.findFewestCoins : [Nat] -> Nat -> Optional [Nat]
+change.findFewestCoins inputCoins target =
+  memoize : (Nat -> {g} a) -> Nat -> {g, Store (NatMap a)} a
+  memoize f n =
+    match NatMap.lookup n Store.get with
+      None ->
+        res = f n
+        _ = Store.modify (memo -> NatMap.insert n res memo)
+        res
+      Some res -> res
+
+  min = cases
+    None, None -> None
+    None, v -> v
+    v, None -> v
+    Some a, Some b | List.size b < List.size a -> Some b
+                   | otherwise -> Some a
+  
+  helper = cases
+    0 -> Some []
+    n ->
+      List.foldLeft
+        (cases
+          acc,coin | coin > n -> acc
+                   | otherwise ->
+                      recursive = Optional.map (lst -> coin List.+: lst) (memoize helper (n - coin))
+                      min acc recursive)
+        None
+        inputCoins
+  
+  initial = NatMap.fromList [(0, Some [])]
+  Store.withInitialValue initial '(memoize helper target)
