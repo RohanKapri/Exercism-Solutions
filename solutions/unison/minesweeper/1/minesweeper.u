@@ -1,0 +1,54 @@
+ascii.digitOffset : Nat
+ascii.digitOffset = 48
+
+minesweeper.adjacentOffsets : [(Nat, Nat)]
+minesweeper.adjacentOffsets = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
+
+minesweeper.annotate : [Text] -> [Text]
+minesweeper.annotate board =
+  if board === [""] then [""] else
+    columnCount = List.head board |> Optional.getOrElse "" |> size
+    originalChars = List.map toCharList board |> List.join
+    mineCountMap = minesweeper.createMineFieldMap board
+    mineCounts = Map.keys mineCountMap |> List.map (pos -> minesweeper.countAdjacentMines pos mineCountMap)
+    
+    annotatedChars = List.zipWith (char count -> 
+      if char == ?* then ?* 
+      else if count == 0 then ?\s 
+      else (Char.fromNat (count + ascii.digitOffset) |> Optional.getOrElse ?\s)) originalChars mineCounts
+    
+    List.map Char.toText annotatedChars 
+      |> List.chunk columnCount 
+      |> List.map (Text.join "")
+
+minesweeper.createMineFieldMap : [Text] -> Map (Nat, Nat) Char
+minesweeper.createMineFieldMap board =
+  rowCount = List.size board
+  columnCount = List.head board |> Optional.getOrElse "" |> size
+  
+  allPositions = minesweeper.generateAllPositions rowCount columnCount
+  allChars = List.map toCharList board |> List.join
+  
+  Map.fromList (List.zip allPositions allChars)
+
+minesweeper.generateAllPositions : Nat -> Nat -> [(Nat, Nat)]
+minesweeper.generateAllPositions rowCount columnCount =
+  Each.toList do (Each.range 1 (1 + rowCount), Each.range 1 (1 + columnCount))
+
+minesweeper.countAdjacentMines : (Nat, Nat) -> Map (Nat, Nat) Char -> Nat
+minesweeper.countAdjacentMines centerPos mineFieldMap =
+  isMine pos = 
+    match Map.get pos mineFieldMap with
+      Some ?* -> 1
+      _       -> 0
+  
+  adjacentPositions = 
+    List.map 
+      (offset -> 
+        ( (at1 centerPos + (at1 offset) - 1)
+        , (at2 centerPos + (at2 offset) - 1)
+        )
+      ) 
+      minesweeper.adjacentOffsets
+  
+  List.map isMine adjacentPositions |> Nat.sum
