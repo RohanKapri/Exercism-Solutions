@@ -1,0 +1,56 @@
+ascii.digitOffset : Nat
+ascii.digitOffset = 48
+
+flowerField.adjacentOffsets : [(Nat, Nat)]
+flowerField.adjacentOffsets = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
+
+flowerField.annotate : [Text] -> [Text]
+flowerField.annotate board =
+  if board === [] then [] else
+  if board === [""] then [""] else
+    columnCount = List.head board |> Optional.getOrElse "" |> size
+    originalChars = List.map toCharList board |> List.join
+    flowerCountMap = flowerField.createFlowerFieldMap board
+    flowerCounts = Map.keys flowerCountMap |> List.map (pos -> flowerField.countAdjacentFlowers pos flowerCountMap)
+    
+    annotatedChars = List.zipWith (char count -> 
+      if char == ?* then ?* 
+      else if count == 0 then ?\s 
+      else (Char.fromNat (count + ascii.digitOffset) |> Optional.getOrElse ?\s)) originalChars flowerCounts
+    
+    List.map Char.toText annotatedChars 
+      |> List.chunk columnCount 
+      |> List.map (Text.join "")
+
+flowerField.createFlowerFieldMap : [Text] -> Map (Nat, Nat) Char
+flowerField.createFlowerFieldMap board =
+  rowCount = List.size board
+  columnCount = List.head board |> Optional.getOrElse "" |> size
+  
+  allPositions = flowerField.generateAllPositions rowCount columnCount
+  allChars = List.map toCharList board |> List.join
+  
+  Map.fromList (List.zip allPositions allChars)
+
+flowerField.generateAllPositions : Nat -> Nat -> [(Nat, Nat)]
+flowerField.generateAllPositions rowCount columnCount =
+  Each.toList do (Each.range 1 (1 + rowCount), Each.range 1 (1 + columnCount))
+
+flowerField.countAdjacentFlowers : (Nat, Nat) -> Map (Nat, Nat) Char -> Nat
+flowerField.countAdjacentFlowers centerPos flowerFieldMap =
+  isFlower pos = 
+    match Map.get pos flowerFieldMap with
+      Some ?* -> 1
+      _       -> 0
+  
+  adjacentPositions = 
+    List.map 
+      (offset -> 
+        ( (at1 centerPos + (at1 offset) - 1)
+        , (at2 centerPos + (at2 offset) - 1)
+        )
+      ) 
+      flowerField.adjacentOffsets
+  
+  List.map isFlower adjacentPositions |> Nat.sum
+  
