@@ -1,0 +1,31 @@
+use Char toNat
+use List any map take tails
+
+unique type Comparison = LT | EQ | GT
+
+largestSeriesProduct.compareNat : Nat -> Nat -> Comparison
+largestSeriesProduct.compareNat n1 n2 =
+  if n1 Nat.< n2 then
+    LT
+  else if n1 Nat.== n2 then
+    EQ
+  else
+    GT
+
+largestSeriesProduct.largestProduct : Text -> Int -> Optional Nat
+largestSeriesProduct.largestProduct inputSequence spanLength =  
+  match Nat.fromInt spanLength with
+    None -> None
+    Some validSpanLength -> toOptional! 'let
+      sequenceLength = size inputSequence
+      abortWhen (validSpanLength > sequenceLength)
+      
+      Text.toCharList inputSequence
+        |> tap (abortWhen << any (not << isDigit))
+        |> map (digitChar -> toNat digitChar - toNat ?0)
+        |> tails
+        |> take (sequenceLength + 1 - validSpanLength)
+        |> map (take validSpanLength)
+        |> map (foldLeft (Nat.*) 1)
+        |> maximum
+        |> Optional.getOrElse 0
