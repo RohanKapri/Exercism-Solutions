@@ -1,0 +1,170 @@
+.globl can_chain
+
+# -----------------------------------------------------------------------------
+# Function: can_chain
+# Inputs:
+#   $a0 - address of the array of stone bytes
+#   $a1 - number of stones (N)
+# Output:
+#   $v0 - 1 if a closed chain is possible, 0 otherwise
+# -----------------------------------------------------------------------------
+
+can_chain:
+    # Base case: 0 stones is trivially valid
+    bne     $a1, $zero, init_data
+    li      $v0, 1
+    jr      $ra
+
+init_data:
+    # Allocate stack space:
+    # 0..27   : degree array (7 words: 0..6)
+    # 28..55  : parent array for Disjoint Set / Union-Find (7 words: 0..6)
+    # Total stack needed = 56 bytes
+    addi    $sp, $sp, -56
+
+    # Initialize degree to 0 and parent to self: parent[i] = i
+    li      $t0, 0              # i = 0
+init_arrays_loop:
+    sll     $t1, $t0, 2         # offset = i * 4
+
+    # degree[i] = 0
+    add     $t2, $sp, $t1
+    sw      $zero, 0($t2)
+
+    # parent[i] = i
+    addi    $t3, $t2, 28
+    sw      $t0, 0($t3)
+
+    addi    $t0, $t0, 1
+    li      $t4, 7
+    blt     $t0, $t4, init_arrays_loop
+
+    # -------------------------------------------------------------------------
+    # Process all stones to compute degrees and union connected vertices
+    # -------------------------------------------------------------------------
+    move    $t0, $a0            # ptr = $a0
+    move    $t1, $a1            # count = $a1
+
+process_stones_loop:
+    beq     $t1, $zero, check_eulerian
+
+    lbu     $t2, 0($t0)         # load byte: high nibble = u, low nibble = v
+    srl     $t3, $t2, 4         # u = byte >> 4
+    andi    $t4, $t2, 0x0F      # v = byte & 0x0F
+
+    # Increment degree[u]
+    sll     $t5, $t3, 2
+    add     $t6, $sp, $t5
+    lw      $t7, 0($t6)
+    addi    $t7, $t7, 1
+    sw      $t7, 0($t6)
+
+    # Increment degree[v]
+    sll     $t5, $t4, 2
+    add     $t6, $sp, $t5
+    lw      $t7, 0($t6)
+    addi    $t7, $t7, 1
+    sw      $t7, 0($t6)
+
+    # Union(u, v)
+    # Find root of u -> $t8
+    move    $t8, $t3
+find_u:
+    sll     $t5, $t8, 2
+    addi    $t6, $sp, 28
+    add     $t6, $t6, $t5
+    lw      $t7, 0($t6)
+    beq     $t8, $t7, find_v
+    move    $t8, $t7
+    j       find_u
+
+    # Find root of v -> $t9
+find_v:
+    move    $t9, $t4
+find_v_loop:
+    sll     $t5, $t9, 2
+    addi    $t6, $sp, 28
+    add     $t6, $t6, $t5
+    lw      $t7, 0($t6)
+    beq     $t9, $t7, do_union
+    move    $t9, $t7
+    j       find_v_loop
+
+do_union:
+    # parent[root_u] = root_v
+    sll     $t5, $t8, 2
+    addi    $t6, $sp, 28
+    add     $t6, $t6, $t5
+    sw      $t9, 0($t6)
+
+    addi    $t0, $t0, 1         # ptr++
+    addi    $t1, $t1, -1        # count--
+    j       process_stones_loop
+
+# -----------------------------------------------------------------------------
+# Check Eulerian Condition 1: All degrees must be EVEN
+# -----------------------------------------------------------------------------
+check_eulerian:
+    li      $t0, 0              # i = 0
+check_degrees_loop:
+    sll     $t1, $t0, 2
+    add     $t2, $sp, $t1
+    lw      $t3, 0($t2)         # degree[i]
+
+    andi    $t4, $t3, 1         # degree % 2
+    bne     $t4, $zero, fail    # Odd degree found -> cannot form loop
+
+    addi    $t0, $t0, 1
+    li      $t5, 7
+    blt     $t0, $t5, check_degrees_loop
+
+# -----------------------------------------------------------------------------
+# Check Eulerian Condition 2: All active vertices must share ONE root
+# -----------------------------------------------------------------------------
+    li      $t0, 0              # i = 0
+    li      $s0, -1             # first_root = -1 (stored in temp $t8 below)
+    li      $t8, -1             # expected_root = -1
+
+check_components_loop:
+    sll     $t1, $t0, 2
+    add     $t2, $sp, $t1
+    lw      $t3, 0($t2)         # degree[i]
+    beq     $t3, $zero, next_vertex  # skip unused vertices
+
+    # Find root of vertex i -> $t4
+    move    $t4, $t0
+find_root_check:
+    sll     $t5, $t4, 2
+    addi    $t6, $sp, 28
+    add     $t6, $t6, $t5
+    lw      $t7, 0($t6)
+    beq     $t4, $t7, verify_root
+    move    $t4, $t7
+    j       find_root_check
+
+verify_root:
+    # If this is the first active vertex, set expected_root = root(i)
+    li      $t9, -1
+    beq     $t8, $t9, set_first_root
+
+    # Otherwise, ensure root matches the expected root
+    bne     $t8, $t4, fail
+    j       next_vertex
+
+set_first_root:
+    move    $t8, $t4
+
+next_vertex:
+    addi    $t0, $t0, 1
+    li      $t5, 7
+    blt     $t0, $t5, check_components_loop
+
+    # Both conditions met!
+    li      $v0, 1
+    addi    $sp, $sp, 56
+    jr      $ra
+
+fail:
+    li      $v0, 0
+    addi    $sp, $sp, 56
+    jr      $ra
