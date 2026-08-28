@@ -1,0 +1,13 @@
+spiralMatrix.spiralMatrix : Nat -> [[Nat]]
+spiralMatrix.spiralMatrix = cases
+  0 -> []
+  1 -> [[1]]
+  n ->
+    use List map reverse rangeClosed
+    offset = 2*n-1
+    spiralMatrix (n-1)
+      |> reverse
+      |> map (map ((Nat.+) offset))
+      |> map reverse
+      |> mapIndexed (i row -> row :+ (n+1+i)) 
+      |> (List.+:) (rangeClosed 1 n)
