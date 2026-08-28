@@ -1,0 +1,12 @@
+cleanstr: $[str][join select str 'l [ in? l {([{}])} ] ]
+
+paired?: function [str][
+    bracketsonly: cleanstr str
+    loop 1..100 'brute [
+        replace 'bracketsonly  ["()","{}","[]"]  ""
+        balanced?: (zero? size bracketsonly)
+        if balanced? -> return true
+        ]
+    balanced?: (zero? size bracketsonly)
+    return balanced?           
+    ]
