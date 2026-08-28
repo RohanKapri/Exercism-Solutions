@@ -1,0 +1,123 @@
+structural type Tree a
+  = Branch a (Optional (Tree a)) (Optional (Tree a))
+
+Tree.root : Tree a -> a
+Tree.root = cases
+  Branch a _ _ -> a
+
+structural ability Zipper t a where
+  setValue : a ->{Zipper t a} ()
+  setLeft : t a ->{Zipper t a} ()
+  setRight : t a ->{Zipper t a} ()
+  left : {Zipper t a} ()
+  right : {Zipper t a} ()
+  up : {Zipper t a} ()
+  focus : {Zipper t a} a
+
+{{
+A path to a node in a tree.
+
+{Top} is the root of the tree.
+{ LeftOf } contains its parent's path, value and right tree.
+{ RightOf } contains is parent's path, value, and left tree.
+}}
+unique type Path a =
+  Top |
+  LeftOf (Path a) a (Optional (Tree a)) |
+  RightOf (Path a) a (Optional (Tree a))
+
+{{
+A (sub)tree and the path that was taken to get to it.
+
+These two pieces of data are enough to reconstruct the entire tree up to the root.
+}}
+unique type ZipperState a = ZipperState (Path a) (Tree a)
+
+ZipperState.tree : ZipperState a -> Tree a
+ZipperState.tree = cases
+  ZipperState _ t -> t
+
+-- Zipper.handlerImpl performs the inner workings of the two following `run` functions.
+Zipper.handlerImpl : Tree a -> Request (Zipper Tree a) r -> (r, Tree a)
+Zipper.handlerImpl =
+  go : ZipperState a -> Request (Zipper Tree a) r2 -> (r2, Tree a)
+  go state = cases
+    { x } -> (x, tree state)
+    { setValue a -> k } ->
+      state' = match state with
+        ZipperState path (Branch _ l r) ->
+          ZipperState path (Branch a l r)
+      handle !k with go state'
+    { setLeft l -> k } ->
+      state' = match state with
+        ZipperState path (Branch a _ r) ->
+          ZipperState path (Branch a (Some l) r)
+      handle !k with go state'
+    { setRight r -> k } ->
+      state' = match state with
+        ZipperState path (Branch a l _) ->
+          ZipperState path (Branch a l (Some r))
+      handle !k with go state'
+    { left -> k } ->
+      state' = match state with
+        ZipperState path (Branch a (Some l) r) ->
+          path' = LeftOf path a r
+          ZipperState path' l
+        _ -> state
+      handle !k with go state'
+    { right -> k } ->
+      state' = match state with
+        ZipperState path (Branch a l (Some r)) ->
+          path' = RightOf path a l
+          ZipperState path' r
+        _ -> state
+      handle !k with go state'
+    { up -> k } ->
+      state' = match state with
+        ZipperState Top _ -> state
+        ZipperState (LeftOf path value r) l ->
+          ZipperState path (Branch value (Some l) r)
+        ZipperState (RightOf path value l) r ->
+          ZipperState path (Branch value l (Some r))
+      handle !k with go state'
+    { focus -> k } -> handle k (state |> tree |> root) with go state
+  tree -> go (ZipperState Top tree)
+
+-- Zipper.run changes the given tree using the zipper ability, returning whatever type the function which performs the Zipper ability returns
+Zipper.run : Tree a -> '{Zipper Tree a} r -> r
+Zipper.run tree zipperFunction =
+  at1 (runWithTree tree zipperFunction)
+
+-- Zipper.runWithTree
+Zipper.runWithTree : Tree a -> '{Zipper Tree a} r -> (r, Tree a)
+Zipper.runWithTree tree zipperFunction =
+  handle !zipperFunction with handlerImpl tree
+
+-- Below is an example of how you might use and run your Zipper ability
+
+testTree : Tree Nat
+testTree = Branch 1 (Some (Branch 2 None None)) (Some (Branch 3 None None))
+
+changeTree : '{Zipper Tree Nat} Nat
+changeTree _ =
+  Zipper.right
+  setValue 400
+  Zipper.up
+  setValue 500
+  setLeft testTree
+  focus
+
+exampleProgram : (Nat, Tree Nat)
+exampleProgram = runWithTree testTree changeTree
+
+{-
+`exampleProgram` should return a focus of `500` and a tree structure:
+
+```
+     500
+    /   \
+    1   400
+  /   \
+ 2     3
+````
+-}
