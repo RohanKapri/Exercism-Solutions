@@ -1,0 +1,56 @@
+structural ability matchingBrackets.Stack a where
+  push : a -> ()
+  pop : ()
+  peek : Optional a
+  isEmpty : Boolean
+
+matchingBrackets.Stack.run : '{Stack a } r -> r
+matchingBrackets.Stack.run stackFunc =
+	impl : List a -> Request {Stack a} r -> r
+	impl list = cases 
+		{ pure } -> pure
+		{ Stack.peek -> resume } ->
+			handle resume (List.last list) with impl list
+		{ Stack.isEmpty -> resume } ->
+			handle resume (List.isEmpty list) with impl list
+		{ Stack.push value -> resume } ->  
+			handle !resume with impl (list :+ value)
+		{ Stack.pop -> resume } ->
+			handle !resume with impl (dropLast list)
+	handle !stackFunc with impl List.empty
+
+				
+matchingBrackets.checkBalance : [Char] -> {Stack Char} Boolean
+matchingBrackets.checkBalance charList =
+	openingBrackets = [?{, ?(, ?[]
+	closingBrackets = [?}, ?), ?]] 
+	bracketPairs = List.zip openingBrackets closingBrackets
+	isOpeningBracket char =
+		List.any ((==) char) openingBrackets 
+	isClosingBracket char =
+		List.any ((==) char) closingBrackets
+	getPairForBracket char =
+		List.find (c -> at1 c Char.== char) bracketPairs |> Optional.map at2
+	validNextChar : Char -> Boolean
+	validNextChar = cases
+		ch 
+		  | isOpeningBracket ch ->  
+			Stack.push(ch) 
+			true
+ 		  | isClosingBracket ch -> 
+			isMatched = 
+				Stack.peek 
+					|> Optional.flatMap getPairForBracket 
+					|> Optional.map ((Char.==) ch)
+					|> getOrElse false
+			Stack.pop
+			isMatched
+		_ -> true
+	existing_matched = List.all validNextChar charList
+	existing_matched && Stack.isEmpty
+
+matchingBrackets.isPaired : Text -> Boolean
+matchingBrackets.isPaired input =
+	input
+		|> toCharList
+		|> (chlist -> Stack.run '(checkBalance chlist))
