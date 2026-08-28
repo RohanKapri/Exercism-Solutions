@@ -1,0 +1,23 @@
+allergies.all = [
+  "eggs",
+  "peanuts",
+  "shellfish",
+  "strawberries",
+  "tomatoes",
+  "chocolate",
+  "pollen",
+  "cats",
+]
+
+allergies.list : Nat -> [Text]
+allergies.list score =
+  func acc allergy = 
+    (arr, bit) = acc
+    newarr = if Nat.isSetBit bit score then arr :+ allergy else arr
+    (newarr, bit+1)
+  
+  List.foldLeft func ([], 0) allergies.all |> at1
+
+allergies.allergicTo : Text -> Nat -> Boolean
+allergies.allergicTo allergen score =
+  allergies.list score |> List.contains allergen
