@@ -1,0 +1,11 @@
+-- "inspired" by runarorama solution
+nucleotideCount.nucleotideCounts : Text -> Optional (Map Text Nat)
+nucleotideCount.nucleotideCounts nucleotides =
+  bases = Text.toBag "ACGT"
+  input = Text.toBag nucleotides
+  toOptional! do
+    when (not <| from input bases) 'abort
+    
+    counts (input + bases)
+      |> Map.map decrement
+      |> mapKeys Char.toText
