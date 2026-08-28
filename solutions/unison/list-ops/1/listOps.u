@@ -1,0 +1,53 @@
+listOps.append : [a] -> [a] -> [a]
+listOps.append list1 list2 =
+  match list1 with
+    [] -> list2
+    x +: xs -> x +: listOps.append xs list2
+
+listOps.concat : [[a]] -> [a]
+listOps.concat nestedList =
+  listOps.foldl listOps.append [] nestedList
+
+listOps.filter : (a -> Boolean) -> [a] -> [a]
+listOps.filter predicate list =
+  match list with
+    [] -> []
+    x +: xs -> 
+      if predicate x then
+        x +: listOps.filter predicate xs
+      else
+        listOps.filter predicate xs
+
+listOps.length : [a] -> Nat
+listOps.length list =
+  match list with
+    [] -> 0
+    _ +: xs -> 1 + listOps.length xs
+
+listOps.map : (a -> b) -> [a] -> [b]
+listOps.map function list =
+  match list with
+    [] -> []
+    x +: xs -> function x +: listOps.map function xs
+
+listOps.foldl : (a -> b -> a) -> a -> [b] -> a
+listOps.foldl function initial list =
+  match list with
+    [] -> initial
+    x +: xs -> listOps.foldl function (function initial x) xs
+
+listOps.foldr : (a -> b -> a) -> a -> [b] -> a
+listOps.foldr function initial list =
+  listOps.foldl function initial (listOps.reverse list)
+
+listOps.reverseHelper : [a] -> [a] -> [a]
+listOps.reverseHelper acc list =
+  match list with
+    [] -> acc
+    x +: xs -> listOps.reverseHelper (x +: acc) xs
+
+listOps.reverse : [a] -> [a]
+listOps.reverse list =
+  match list with
+    [] -> []
+    x +: xs -> listOps.append (listOps.reverse xs) [x]
