@@ -1,0 +1,148 @@
+at5 = cases Cons _ (Cons _ (Cons _ (Cons _ (Cons x _)))) -> x
+
+allHouses = ["red", "ivory", "green", "yellow", "blue"]
+allNationalities = ["Englishman", "Spaniard", "Ukrainian", "Norwegian", "Japanese"]
+allPets = ["dog", "snails", "fox", "horse", "zebra"]
+allBeverages = ["coffee", "tea", "milk", "orange juice", "water"]
+allCigarettes = ["Old Gold", "Kool", "Chesterfield", "Lucky Strike", "Parliament"]
+
+deleteAll deletes list =
+  List.filter (item -> not (List.contains item deletes)) list
+
+unusedTupleMembers usedTuples =
+  hs = usedTuples |> List.map at1 |> (xs -> deleteAll xs allHouses)
+  ns = usedTuples |> List.map at2 |> (xs -> deleteAll xs allNationalities)
+  ps = usedTuples |> List.map at3 |> (xs -> deleteAll xs allPets)
+  bs = usedTuples |> List.map at4 |> (xs -> deleteAll xs allBeverages)
+  cs = usedTuples |> List.map at5 |> (xs -> deleteAll xs allCigarettes)
+  (hs, ns, ps, bs, cs)
+
+candidateTuples currentTuples =
+  i = (List.size currentTuples) + 1
+  if i > 5 then
+    []
+  else
+
+    go currentTuples _ =
+      use Each range each
+      (hs, ns, ps, bs, cs) = unusedTupleMembers currentTuples
+      h1 = each hs
+      n1 = each ns
+      p1 = each ps
+      b1 = each bs
+      c1 = each cs
+
+      -- excludes candidates for which this returns `true`
+      unaryChecks tuple =
+        (i, h, n, p, b, c) = tuple
+        false
+          -- 2: The Englishman lives in the red house.
+          || ((h === "red") && (n !== "Englishman"))
+          || ((h !== "red") && (n === "Englishman"))
+          -- 3: The Spaniard owns the dog.
+          || ((n === "Spaniard") && (p !== "dog")) -- 3
+          || ((n !== "Spaniard") && (p === "dog")) -- 3
+          -- 4: Coffee is drunk in the green house.
+          || ((h === "green") && (b !== "coffee")) -- 4
+          || ((h !== "green") && (b === "coffee")) -- 4
+          -- 5: The Ukrainian drinks tea.
+          || ((n === "Ukrainian") && (b !== "tea")) -- 5
+          || ((n !== "Ukrainian") && (b === "tea")) -- 5
+          -- 7: The Old Gold smoker owns snails.
+          || ((p === "snails") && (c !== "Old Gold")) -- 7
+          || ((p !== "snails") && (c === "Old Gold")) -- 7
+          -- 8: Kools are smoked in the yellow house.
+          || ((h === "yellow") && (c !== "Kool")) -- 8
+          || ((h !== "yellow") && (c === "Kool")) -- 8
+          -- 9: Milk is drunk in the middle house.
+          || ((i === 3) && (b !== "milk")) -- 9
+          || ((i !== 3) && (b === "milk")) -- 9
+          -- 10: The Norwegian lives in the first house.
+          || ((i === 1) && (n !== "Norwegian")) -- 10
+          || ((i !== 1) && (n === "Norwegian")) -- 10
+          -- 13: The Lucky Strike smoker drinks orange juice.
+          || ((b === "orange juice") && (c !== "Lucky Strike")) -- 13
+          || ((b !== "orange juice") && (c === "Lucky Strike")) -- 13
+          -- 14: The Japanese smokes Parliaments.
+          || ((n === "Japanese") && (c !== "Parliament")) -- 14
+          || ((n !== "Japanese") && (c === "Parliament")) -- 14
+
+          -- || ((c === "Chesterfield") && (p === "fox")) -- 11
+          -- || ((c === "Kool") && (p === "horse")) -- 12
+          -- || ((h === "blue") && (n === "Norwegian")) -- 15
+          -- || ((i === 1) && (h === "green")) -- 6
+          -- || ((i === 5) && (h === "ivory")) -- 6
+          -- || ((i === 2) && (h !== "blue")) -- 10 && 15
+          -- || ((i !== 2) && (h === "blue")) -- 10 && 15
+          -- || ((p === "horse") && (h === "yellow")) -- 8 && 12
+      
+      -- excludes candidates for which this returns `true`
+      sequenceChecks currentTuples tuple =
+        match currentTuples with
+          [] -> false
+          ts :+ tl ->
+            (h0, n0, p0, b0, c0) = tl
+            (h1, n1, p1, b1, c1) = tuple
+            (false
+              -- 6: The green house is immediately to the right of the ivory house.
+              || ((h0 === "ivory") && (h1 !== "green"))
+              || ((h0 !== "ivory") && (h1 === "green"))
+              || ((h1 === "ivory") && (not (List.contains "green" (deleteAll [h1] hs))))
+              -- 11: The man who smokes Chesterfields lives in the house next to the man with the fox.
+              || ((c1 === "Chesterfield") && (p0 !== "fox") && (not (List.contains "fox" (deleteAll [p1] ps))))
+              || ((p1 === "fox") && (c0 !== "Chesterfield") && (not (List.contains "Chesterfield" (deleteAll [c1] cs))))
+              -- -- 12: Kools are smoked in the house next to the house where the horse is kept.
+              || ((c1 === "Kool") && (p0 !== "horse") && (not (List.contains "horse" (deleteAll [p1] ps))))
+              || ((p1 === "horse") && (c0 !== "Kool") && (not (List.contains "Kool" (deleteAll [c1] cs))))
+              -- -- 15: The Norwegian lives next to the blue house.
+              || ((n1 === "Norwegian") && (h0 !== "blue") && (not (List.contains "blue" hs)))
+              || ((h1 === "blue") && (n0 !== "Norwegian") && (not (List.contains "Norwegian" ns)))
+            )
+
+      guard
+        (not (
+          false
+            || unaryChecks (i, h1, n1, p1, b1, c1)
+            || sequenceChecks currentTuples (h1, n1, p1, b1, c1)
+        ))
+      
+      (h1, n1, p1, b1, c1)
+    Each.toList (go currentTuples)
+
+
+solution _ =
+
+  go currentTuples =
+    i = (List.size currentTuples) + 1
+    match (i, candidateTuples currentTuples) with
+      5, [t] -> Some (currentTuples ++ [t])
+      i, [] | i <= 5 -> None
+      _, ts ->
+        ts
+          |> List.findMap
+            (candidate ->
+              go (currentTuples ++ [candidate]))
+
+
+  go []
+
+
+{{Which resident owns the Zebra?}}
+-- zebraPuzzle.ownsZebra : Text
+zebraPuzzle.ownsZebra =
+  !solution
+    |> Optional.getOrBug "There should be one solution"
+    |> List.filter (cases (_, _, p, _, _) -> p === "zebra")
+    |> List.head
+    |> Optional.getOrBug "There should be one solution"
+    |> at2
+
+{{Which resident drinks Water?}}
+-- zebraPuzzle.drinksWater : Text
+zebraPuzzle.drinksWater =
+  !solution
+    |> Optional.getOrBug "There should be one solution"
+    |> List.filter (cases (_, _, _, b, _) -> b === "water")
+    |> List.head
+    |> Optional.getOrBug "There should be one solution"
+    |> at2
