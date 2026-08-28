@@ -1,0 +1,27 @@
+cryptoSquare.ciphertext : Text -> Text
+cryptoSquare.ciphertext inputText =
+  use Text flatMap toLowercase toCharList alignLeftWith
+  use List map
+  use Char toText
+  use Optional getOrElse
+
+  normalized = flatMap (c -> if isAlphaNum c then toText c |> toLowercase else "") inputText
+  
+  getDimensions : Nat -> (Nat, Nat)
+  getDimensions n =
+    use Nat *
+    c = toFloat n |> sqrt |> truncate |> toNat |> getOrElse 0
+    if c * c == n
+      then (c,c)
+    else if c * c + c >= n
+      then (c, c+1)
+    else (c+1, c+1)
+
+  (r, c) = Text.size normalized |> getDimensions
+  
+  alignLeftWith (r*c) ?\s normalized 
+    |> chunk c
+    |> map toCharList
+    |> transpose
+    |> map fromCharList
+    |> join " "
