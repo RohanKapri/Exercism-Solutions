@@ -1,0 +1,23 @@
+isogram.wordBoundary : Char -> Boolean
+isogram.wordBoundary c = Char.isWhitespace c || (c == ?-)
+
+isogram.squeezed : Text -> Text
+isogram.squeezed text =
+  text
+    |> toLowercase
+    |> toCharList
+    |> filter (not << wordBoundary)
+    |> distinct
+    |> fromCharList
+
+isogram.prepped : Text -> Text
+isogram.prepped text =
+  text
+    |> toLowercase
+    |> toCharList
+    |> filter (not << wordBoundary)
+    |> fromCharList
+
+isogram.isIsogram : Text -> Boolean
+isogram.isIsogram text =
+  prepped(text) == squeezed(text)
