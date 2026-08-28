@@ -1,0 +1,66 @@
+unique type yacht.Category
+  = Ones
+  | Twos
+  | Threes
+  | Fours
+  | Fives
+  | Sixes
+  | FullHouse
+  | FourOfAKind
+  | LittleStraight
+  | BigStraight
+  | Choice
+  | Yacht
+
+yacht.yacht : Category -> [Nat] -> Nat
+yacht.yacht category dice = match category with
+  Ones -> 1 * (NatMap.getOrElse 1 0 (scores dice))
+  Twos -> 2 * (NatMap.getOrElse 2 0 (scores dice))
+  Threes -> 3 * (NatMap.getOrElse 3 0 (scores dice))
+  Fours -> 4 * (NatMap.getOrElse 4 0 (scores dice))
+  Fives -> 5 * (NatMap.getOrElse 5 0 (scores dice))
+  Sixes -> 6 * (NatMap.getOrElse 6 0 (scores dice))
+  FullHouse -> yacht.fullHouse dice
+  FourOfAKind -> yacht.fourOfAKind dice
+  LittleStraight -> yacht.littleStraight dice
+  BigStraight -> yacht.bigStraight dice
+  Choice -> Nat.sum dice
+  Yacht -> yacht.yachtScore dice
+
+yacht.scores : [Nat] -> NatMap Nat
+yacht.scores dice =
+  keys = [1, 2, 3, 4, 5, 6]
+  List.map (x -> List.countElement x dice) keys 
+    |> List.zip keys 
+    |> NatMap.fromList
+
+yacht.fullHouse : [Nat] -> Nat
+yacht.fullHouse dice =
+  match (List.sort (NatMap.values (scores dice))) with
+    [0, 0, 0, 0, 2, 3] -> Nat.sum dice
+    _ -> 0
+
+yacht.fourOfAKind : [Nat] -> Nat
+yacht.fourOfAKind dice =
+  match (List.sort (NatMap.values (scores dice))) with
+    [0, 0, 0, 0, 1, 4] -> NatMap.filter (x -> x == 4) (scores dice) |> NatMap.keys |> List.foldMap (x -> x * 4) (+) 0
+    [0, 0, 0, 0, 0, 5] -> NatMap.filter (x -> x == 5) (scores dice) |> NatMap.keys |> List.foldMap (x -> x * 4) (+) 0
+    _ -> 0
+
+yacht.littleStraight : [Nat] -> Nat
+yacht.littleStraight dice =
+  match (List.sort dice) with
+    [1, 2, 3, 4, 5] -> 30
+    _ -> 0
+
+yacht.bigStraight : [Nat] -> Nat
+yacht.bigStraight dice =
+  match (List.sort dice) with
+    [2, 3, 4, 5, 6] -> 30
+    _ -> 0
+
+yacht.yachtScore : [Nat] -> Nat
+yacht.yachtScore dice =
+  match (List.sort (NatMap.values (scores dice))) with
+    [0, 0, 0, 0, 0, 5] -> 50
+    _ -> 0
