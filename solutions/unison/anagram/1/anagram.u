@@ -1,0 +1,18 @@
+anagram.toBagText : Text -> Text
+anagram.toBagText word =
+  Bag.toText (Text.toBag word)
+
+anagram.checkAnagram : Text -> Text -> Boolean
+anagram.checkAnagram targetWord candidateWord =
+  uppercaseTarget = Text.toUppercase targetWord
+  uppercaseCandidate = Text.toUppercase candidateWord
+  if uppercaseTarget Text.== uppercaseCandidate 
+    then false
+    else 
+      if anagram.toBagText uppercaseTarget Text.== anagram.toBagText uppercaseCandidate
+      then true
+      else false
+
+anagram.findAnagrams : Text -> [Text] -> [Text]
+anagram.findAnagrams targetWord candidateWords =
+  List.filter (candidateWord -> checkAnagram targetWord candidateWord) candidateWords
