@@ -1,0 +1,74 @@
+-- Translates a text to Pig Latin
+pigLatin.translate : Text -> Text
+pigLatin.translate inputText =
+  use pigLatin applyRules
+  words inputText |> List.map applyRules |> Text.join " "
+
+-- Applies Pig Latin rules to a single word
+pigLatin.applyRules : Text -> Text
+pigLatin.applyRules word =
+  use pigLatin vowelRule quRule yRule consonantRule
+  result = Text.join "" [vowelRule word, quRule word, yRule word]
+  if result == "" then consonantRule word else result
+
+-- Pattern for consonants
+pigLatin.consonants : Pattern Text
+pigLatin.consonants =
+  charIn (toCharList "bcdfghjklmnpqrstvwxyz")
+
+-- Pattern for consonants except 'q'
+pigLatin.consonantsExceptQ : Pattern Text
+pigLatin.consonantsExceptQ =
+  charIn (toCharList "bcdfghjklmnprstvwxyz")
+
+-- Pattern for consonants except 'y'
+pigLatin.consonantsExceptY : Pattern Text
+pigLatin.consonantsExceptY =
+  charIn (toCharList "bcdfghjklmnpqrstvwxz")
+
+-- Helper function for combining patterns
+pigLatin.orPattern : Pattern a -> Pattern a -> Pattern a
+pigLatin.orPattern = Pattern.or
+
+-- Rule for words starting with vowels
+pigLatin.vowelRule : Text -> Text
+pigLatin.vowelRule word =
+  use pigLatin orPattern
+  vowelPatterns : [Pattern Text]
+  vowelPatterns = List.map literal ["a", "e", "i", "o", "u", "xr", "yt"]
+  vowelPattern : Pattern Text
+  vowelPattern = match vowelPatterns with
+    []     -> literal ""  -- This case should never happen with our vowels list
+    v +: vs -> List.foldLeft orPattern v vs
+  match Pattern.run (Pattern.capture vowelPattern) word with
+    None   -> ""
+    Some _ -> word ++ "ay"
+
+-- Rule for words starting with consonants
+pigLatin.consonantRule : Text -> Text
+pigLatin.consonantRule word =
+  use pigLatin consonants
+  match Pattern.run (Pattern.capture (some consonants)) word with
+    None   -> ""
+    Some ([], remainder) -> remainder ++ "ay"
+    Some (firstConsonants +: _, remainder) -> remainder ++ firstConsonants ++ "ay"
+
+-- Rule for words containing 'qu'
+pigLatin.quRule : Text -> Text
+pigLatin.quRule word =
+  use pigLatin consonantsExceptQ
+  match Pattern.run (Pattern.capture (Pattern.join 
+    [many consonantsExceptQ, literal "qu"])) word with
+    None   -> ""
+    Some ([], remainder) -> remainder ++ "ay"
+    Some (consonantsBeforeQu +: _, remainder) -> remainder ++ consonantsBeforeQu ++ "ay"
+
+-- Rule for words containing 'y' after consonants
+pigLatin.yRule : Text -> Text
+pigLatin.yRule word =
+  use pigLatin consonantsExceptY
+  match Pattern.run (Pattern.join [Pattern.capture ( 
+    some consonantsExceptY), literal "y"]) word with
+    None   -> ""
+    Some ([], remainder) -> remainder ++ "ay"
+    Some (consonantsBeforeY +: _, remainder) -> "y" ++ remainder ++ consonantsBeforeY ++ "ay"
