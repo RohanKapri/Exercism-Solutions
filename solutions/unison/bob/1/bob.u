@@ -1,0 +1,18 @@
+bob.response : Text -> Text
+bob.response sentence =
+  trimmedInput = trim sentence
+  
+  isQuestion = endsWith "?" trimmedInput
+  
+  isShouting =
+    use Text ==
+    (Text.toUppercase trimmedInput == trimmedInput) && (toCharList trimmedInput |> List.any isLetter)
+  
+  isSilence = Text.isEmpty trimmedInput
+  
+  match (isQuestion, isShouting, isSilence) with
+    (true, true, _) -> "Calm down, I know what I'm doing!"
+    (true, false, _) -> "Sure."
+    (false, true, _) -> "Whoa, chill out!"
+    (false, false, true) -> "Fine. Be that way!"
+    _ -> "Whatever."
