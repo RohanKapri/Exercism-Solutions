@@ -1,0 +1,20 @@
+allYourBase.rebase : Int -> [Int] -> Int -> Optional [Int]
+allYourBase.rebase inputBase inputDigits outputBase =
+  Abort.toOptional! 'let
+    when (inputBase < +2) 'abort
+    when (outputBase < +2) 'abort
+  
+    num = List.foldLeft (cases
+            acc, digit  | digit < +0 -> abort
+                        | digit >= inputBase -> abort
+                        | otherwise -> acc * inputBase + digit) +0 inputDigits
+
+    if num == +0 then [+0]
+    else
+      List.unfold num (cases
+        n | n == +0 -> None
+          | otherwise ->
+            rem = Int.mod n outputBase
+            div = Int.div n outputBase
+            Some (rem, div))  
+        |> List.reverse
