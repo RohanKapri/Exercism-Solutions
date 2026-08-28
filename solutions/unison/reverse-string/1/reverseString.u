@@ -1,0 +1,10 @@
+reverseString.reverse : Text -> Text
+reverseString.reverse inputText =
+    inputText
+        |> Text.toCharList
+        |> List.foldRight
+            (char accumulator ->
+                accumulator :+ char
+            ) []
+        |> Text.fromCharList
+        
