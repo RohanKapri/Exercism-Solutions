@@ -1,0 +1,16 @@
+acronym.abbreviate : Text -> Text
+acronym.abbreviate test = 
+  use Text ++
+  go acc rest expectInitial = match rest with
+    [] -> acc
+    h +: tail ->
+      if expectInitial then
+        if Char.ascii.isLetter h then
+          go (acc ++ Char.toText(Char.toUppercase h)) tail false
+        else go acc tail true
+      else
+        if h === ?- || Char.isWhitespace h then
+          go acc tail true
+      else go acc tail false
+  
+  go "" (toCharList test) true
