@@ -1,0 +1,10 @@
+etl.expandLetters : Nat -> [Char] -> [(Char, Nat)]
+etl.expandLetters score letters =
+  letters |> List.map (letter -> (Char.toLowercase letter, score))
+
+etl.transform : Map Nat [Char] -> Map Char Nat
+etl.transform lettersByScore =
+  lettersByScore
+    |> Map.toList
+    |> List.flatMap (uncurry expandLetters)
+    |> Map.fromList
