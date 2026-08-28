@@ -1,0 +1,9 @@
+darts.score : Float -> Float -> Nat
+darts.score x y =
+  use Float * + >
+  match x * x + (y * y) with
+    d 
+      | d > 100.0 -> 0
+      | d > 25.0  -> 1
+      | d > 1.0   -> 5
+      | otherwise -> 10
